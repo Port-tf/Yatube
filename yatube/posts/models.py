@@ -85,4 +85,4 @@ class Follow(models.Model):
         on_delete=models.CASCADE,
         related_name='following',
         verbose_name='Подпишись на меня'
-    )  # пользователь, на который подписывается
+    )  # пользователь, на которого подписывается
