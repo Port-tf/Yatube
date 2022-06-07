@@ -1,0 +1,34 @@
+{% load thumbnail %}
+<article>
+  <ul>
+    {% if author %}
+      <li>
+        {{ post.author.get_full_name }}
+      </li>
+    {% else %}
+      <li>
+        <a href="{% url 'posts:profile' post.author.username %}">Автор: {{ post.author.get_full_name }}</a>
+      </li>
+    {% endif %}
+    <li>
+      Дата публикации: {{ post.pub_date|date:"d E Y" }} 
+    </li>
+  </ul>
+  {% thumbnail post.image "900x339" crop="center" upscale=True as im %}
+    <img class="card-img my-2" src="{{ im.url }}" alt="">
+  {% endthumbnail %}
+  <p>
+    {{ post.text|linebreaks }}
+  </p>
+  <a href="{% url 'posts:post_detail' post.pk %}">подробная информация </a><br>
+  {% if not group %}
+    {% if post.group %}
+      все записи группы: <a href="{% url 'posts:group_list' post.group.slug %}">#</a>
+    {% else %}
+      <span style="color: red"> Тема не определена автором </span>
+    {% endif %}
+  {% endif %}
+  {% if not forloop.last %}
+    <hr>
+  {% endif %}
+</article> 

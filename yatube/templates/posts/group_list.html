@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  {{ group.title }}
+{% endblock %}
+
+{% block content %}
+  <h1>{{ group.title }}</h1>
+  <p>{{ group.description|linebreaks }}</p>
+  {% for post in page_obj %}
+    {% include 'posts/includes/vis_post.html' %}
+  {% endfor %}
+
+  {% include 'posts/includes/paginator.html' %}
+
+{% endblock %}

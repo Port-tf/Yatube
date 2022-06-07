@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load cache %}
+{% block title %}
+  Подписки на посты автора
+{% endblock %}
+
+{% block content %}
+  <h1>Gjlgbcrb</h1>
+  {% include 'posts/includes/switcher.html' %}
+  {% for post in page_obj %}
+    {% include 'posts/includes/vis_post.html' %}
+  {% endfor %}
+  
+  {% include 'posts/includes/paginator.html' %}
+{% endblock %}
