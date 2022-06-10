@@ -40,14 +40,19 @@ class PostURLTests(TestCase):
         self.hard_names = (
             ('posts:index', None, '/'),
             ('posts:follow_index', None, '/follow/'),
-            ('posts:group_list', (self.group.slug,), f'/group/{self.group.slug}/'),
+            ('posts:group_list', (self.group.slug,),
+             f'/group/{self.group.slug}/'),
             ('posts:profile', (self.user,), f'/profile/{self.user}/'),
             ('posts:post_detail', (self.post.id,), f'/posts/{self.post.id}/'),
-            ('posts:post_edit', (self.post.id,), f'/posts/{self.post.id}/edit/'),
+            ('posts:post_edit', (self.post.id,),
+             f'/posts/{self.post.id}/edit/'),
             ('posts:post_create', None, '/create/'),
-            ('posts:add_comment', (self.post.id,), f'/posts/{self.post.id}/comment/'),
-            ('posts:profile_follow', (self.user,), f'/profile/{self.user}/follow/'),
-            ('posts:profile_unfollow', (self.user,), f'/profile/{self.user}/unfollow/'),
+            ('posts:add_comment', (self.post.id,),
+             f'/posts/{self.post.id}/comment/'),
+            ('posts:profile_follow', (self.user,),
+             f'/profile/{self.user}/follow/'),
+            ('posts:profile_unfollow', (self.user,),
+             f'/profile/{self.user}/unfollow/'),
 
         )
         self.login = reverse('users:login')
@@ -86,7 +91,8 @@ class PostURLTests(TestCase):
                             'posts:post_detail',
                             args=(self.post.id,)
                     ))
-                elif name in ('posts:profile_follow', 'posts:profile_unfollow'):
+                elif name in ('posts:profile_follow',
+                              'posts:profile_unfollow'):
                     self.assertRedirects(self.authorized_client.get(
                         reverse(name, args=arg),),
                         reverse(
@@ -102,8 +108,12 @@ class PostURLTests(TestCase):
         пользователя."""
         for name, arg, url in self.hard_names:
             with self.subTest(name=name):
-                if name in ('posts:post_edit', 'posts:post_create', 'posts:add_comment', 
-                    'posts:follow_index', 'posts:profile_follow', 'posts:profile_unfollow'):
+                if name in ('posts:post_edit',
+                            'posts:post_create',
+                            'posts:add_comment',
+                            'posts:follow_index',
+                            'posts:profile_follow',
+                            'posts:profile_unfollow'):
                     response = self.client.get(
                         reverse(name, args=arg), follow=True)
                     self.assertRedirects(

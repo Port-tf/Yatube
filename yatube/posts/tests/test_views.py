@@ -218,7 +218,8 @@ class PostPagesTests(TestCase):
         """Проверка на создание подписчика."""
         response = self.no_follower_client.get(reverse('posts:follow_index'))
         count_post_follower = len(response.context['page_obj'])
-        response = self.no_follower_client.get(reverse('posts:profile_follow', args=(self.user,)))
+        response = self.no_follower_client.get(reverse(
+            'posts:profile_follow', args=(self.user,)))
         response = self.no_follower_client.get(reverse('posts:follow_index'))
         self.assertFalse(count_post_follower)
         self.assertTrue(len(response.context['page_obj']))
@@ -227,7 +228,8 @@ class PostPagesTests(TestCase):
         """Проверка на удаление подписчика."""
         response = self.follower_client.get(reverse('posts:follow_index'))
         count_post_follower = len(response.context['page_obj'])
-        response = self.follower_client.get(reverse('posts:profile_unfollow', args=(self.user,)))
+        response = self.follower_client.get(reverse(
+            'posts:profile_unfollow', args=(self.user,)))
         response = self.follower_client.get(reverse('posts:follow_index'))
         self.assertTrue(count_post_follower)
         self.assertFalse(len(response.context['page_obj']))
@@ -248,8 +250,6 @@ class PaginatorViewsTest(TestCase):
         )
         cls.follower_client = Client()
         cls.follower_client.force_login(cls.follow_user)
-
-
         for copy_post in range(settings.PAGINATOR_POST_CREATE):
             Post.objects.create(
                 author=cls.user,
