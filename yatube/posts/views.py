@@ -33,10 +33,7 @@ def profile(request, username):
     author = get_object_or_404(User, username=username)
     author_posts = author.posts.select_related('group').all()
     page_obj = paginator_posts(request, author_posts)
-    following = False
-    if request.user.is_authenticated:
-        following = Follow.objects.filter(
-            author=author, user=request.user).exists()
+    following = request.user.is_authenticated and author.following.exists()
     context = {
         'author': author,
         'page_obj': page_obj,
@@ -46,9 +43,10 @@ def profile(request, username):
 
 
 def post_detail(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
+    post = get_object_or_404(
+        Post.objects.select_related('author').prefetch_related('comments__author'), id=post_id)
     form = CommentForm(request.POST or None)
-    comments = post.comments.select_related('author').all()
+    comments = post.comments.all()
     context = {
         'post': post,
         'form': form,
@@ -99,7 +97,8 @@ def add_comment(request, post_id):
 
 @login_required
 def follow_index(request):
-    posts = Post.objects.filter(author__following__user=request.user)
+    posts = Post.objects.select_related(
+        'author', 'group').filter(author__following__user=request.user)
     page_obj = paginator_posts(request, posts)
     context = {
         'page_obj': page_obj,
@@ -117,7 +116,5 @@ def profile_follow(request, username):
 
 @login_required
 def profile_unfollow(request, username):
-    author = get_object_or_404(User, username=username)
-    follower = Follow.objects.filter(user=request.user, author=author)
-    follower.delete()
+    Follow.objects.filter(author__username=username).delete()
     return redirect('posts:profile', username)

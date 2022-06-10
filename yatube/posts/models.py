@@ -70,6 +70,8 @@ class Comment(models.Model):
         'Дата публикации комментария', auto_now_add=True)
 
     class Meta:
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
         ordering = ('-created',)
 
 
@@ -86,3 +88,7 @@ class Follow(models.Model):
         related_name='following',
         verbose_name='Подпишись на меня'
     )  # пользователь, на которого подписывается
+
+    class Meta:
+        verbose_name = 'Подписка на автора'
+        verbose_name_plural = 'Подписки на авторов'

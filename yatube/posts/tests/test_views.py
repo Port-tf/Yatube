@@ -62,6 +62,7 @@ class PostPagesTests(TestCase):
         self.assertEqual(post_author, self.post.author)
         self.assertEqual(post_data, self.post.pub_date)
         self.assertEqual(post_image, self.post.image)
+        self.assertContains(response, text='<img', count=1)
 
     def test_create_page_show_correct_context(self):
         """Шаблон post_create сформирован с правильным контекстом."""
@@ -193,10 +194,7 @@ class PostPagesTests(TestCase):
     def test_follow_index_show_context(self):
         """Шаблон follow_index сформирован с правильным контекстом."""
         response = self.follower_client.get(reverse('posts:follow_index'))
-        self.assertEqual(response.status_code, HTTPStatus.OK)
-        post_context = response.context.get('page_obj')[0]
-        post_text = post_context.text
-        self.assertEqual(self.post.text, post_text)
+        self.examination_context(response)
 
     def test_follow_index_show_cont(self):
         """Шаблон follow сформирован с правильным контекстом."""
@@ -220,17 +218,16 @@ class PostPagesTests(TestCase):
         """Проверка на создание подписчика."""
         response = self.no_follower_client.get(reverse('posts:follow_index'))
         count_post_follower = len(response.context['page_obj'])
-        Follow.objects.create(
-            user=self.no_follow_user, author=self.user)
+        response = self.no_follower_client.get(reverse('posts:profile_follow', args=(self.user,)))
         response = self.no_follower_client.get(reverse('posts:follow_index'))
         self.assertFalse(count_post_follower)
         self.assertTrue(len(response.context['page_obj']))
 
     def test_follower_delete_to_user(self):
-        """Проверка на создание подписчика."""
+        """Проверка на удаление подписчика."""
         response = self.follower_client.get(reverse('posts:follow_index'))
         count_post_follower = len(response.context['page_obj'])
-        self.follower.delete()
+        response = self.follower_client.get(reverse('posts:profile_unfollow', args=(self.user,)))
         response = self.follower_client.get(reverse('posts:follow_index'))
         self.assertTrue(count_post_follower)
         self.assertFalse(len(response.context['page_obj']))
@@ -241,11 +238,17 @@ class PaginatorViewsTest(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.user = User.objects.create_user(username='Luser')
+        cls.follow_user = User.objects.create_user(username='Lower')
+        Follow.objects.create(
+            user=cls.follow_user, author=cls.user)
         cls.group = Group.objects.create(
             title='Тестовый заголовок',
             slug='test-slug',
             description='Жили-были',
         )
+        cls.follower_client = Client()
+        cls.follower_client.force_login(cls.follow_user)
+
 
         for copy_post in range(settings.PAGINATOR_POST_CREATE):
             Post.objects.create(
@@ -257,6 +260,7 @@ class PaginatorViewsTest(TestCase):
             ('posts:index', None),
             ('posts:group_list', (cls.group.slug,)),
             ('posts:profile', (cls.user,)),
+            ('posts:follow_index', None),
         )
         cls.kortage = (
             ('?page=1', settings.PAGINATOR_POST_LIMIT),
@@ -268,7 +272,7 @@ class PaginatorViewsTest(TestCase):
             with self.subTest(name=name):
                 for page, count in self.kortage:
                     with self.subTest(count=count):
-                        response = self.client.get(
+                        response = self.follower_client.get(
                             reverse(name, args=arg) + page)
                         self.assertEqual(
                             len(response.context['page_obj']), count)

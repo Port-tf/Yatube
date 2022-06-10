@@ -29,16 +29,26 @@ class PostURLTests(TestCase):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
         self.url_names = (
-            ('posts:index', None, 'posts/index.html', '/'),
-            ('posts:group_list', (self.group.slug,), 'posts/group_list.html',
-             f'/group/{self.group.slug}/'),
-            ('posts:profile', (self.user,), 'posts/profile.html',
-             f'/profile/{self.user}/'),
-            ('posts:post_detail', (self.post.id,), 'posts/post_detail.html',
-             f'/posts/{self.post.id}/'),
-            ('posts:post_edit', (self.post.id,), 'posts/post_create.html',
-             f'/posts/{self.post.id}/edit/'),
-            ('posts:post_create', None, 'posts/post_create.html', '/create/'),
+            ('posts:index', None, 'posts/index.html'),
+            ('posts:follow_index', None, 'posts/follow.html'),
+            ('posts:group_list', (self.group.slug,), 'posts/group_list.html'),
+            ('posts:profile', (self.user,), 'posts/profile.html'),
+            ('posts:post_detail', (self.post.id,), 'posts/post_detail.html'),
+            ('posts:post_edit', (self.post.id,), 'posts/post_create.html'),
+            ('posts:post_create', None, 'posts/post_create.html'),
+        )
+        self.hard_names = (
+            ('posts:index', None, '/'),
+            ('posts:follow_index', None, '/follow/'),
+            ('posts:group_list', (self.group.slug,), f'/group/{self.group.slug}/'),
+            ('posts:profile', (self.user,), f'/profile/{self.user}/'),
+            ('posts:post_detail', (self.post.id,), f'/posts/{self.post.id}/'),
+            ('posts:post_edit', (self.post.id,), f'/posts/{self.post.id}/edit/'),
+            ('posts:post_create', None, '/create/'),
+            ('posts:add_comment', (self.post.id,), f'/posts/{self.post.id}/comment/'),
+            ('posts:profile_follow', (self.user,), f'/profile/{self.user}/follow/'),
+            ('posts:profile_unfollow', (self.user,), f'/profile/{self.user}/unfollow/'),
+
         )
         self.login = reverse('users:login')
         self.edit = reverse('posts:post_edit', args=(self.post.id,))
@@ -51,14 +61,14 @@ class PostURLTests(TestCase):
     def test_template_name_author_client_template(self):
         """reverse использует нужный шаблон для авторизированого
         пользователя, он же автор."""
-        for name, arg, template, _ in self.url_names:
+        for name, arg, template in self.url_names:
             with self.subTest(name=name):
                 response = self.authorized_client.get(reverse(name, args=arg))
                 self.assertTemplateUsed(response, template)
 
     def test_reverse_name(self):
         """reverse использует нужный хардурл."""
-        for name, arg, _, url in self.url_names:
+        for name, arg, url in self.hard_names:
             with self.subTest(name=name):
                 self.assertEqual(reverse(name, args=arg), url)
 
@@ -67,14 +77,21 @@ class PostURLTests(TestCase):
         пользователя, не автор поста."""
         zed_client = User.objects.create_user(username='Valli')
         self.authorized_client.force_login(zed_client)
-        for name, arg, _, _ in self.url_names:
+        for name, arg, _ in self.hard_names:
             with self.subTest(name=name):
-                if name == 'posts:post_edit':
+                if name in ('posts:post_edit', 'posts:add_comment'):
                     self.assertRedirects(self.authorized_client.get(
                         reverse(name, args=arg), follow=True),
                         reverse(
                             'posts:post_detail',
                             args=(self.post.id,)
+                    ))
+                elif name in ('posts:profile_follow', 'posts:profile_unfollow'):
+                    self.assertRedirects(self.authorized_client.get(
+                        reverse(name, args=arg),),
+                        reverse(
+                            'posts:profile',
+                            args=(self.user,)
                     ))
                 else:
                     self.assertEqual(self.authorized_client.get(
@@ -83,9 +100,10 @@ class PostURLTests(TestCase):
     def test_reverse_anonom_client_template(self):
         """reverse использует нужный шаблон для анонимного
         пользователя."""
-        for name, arg, _, url in self.url_names:
+        for name, arg, url in self.hard_names:
             with self.subTest(name=name):
-                if name in ('posts:post_edit', 'posts:post_create'):
+                if name in ('posts:post_edit', 'posts:post_create', 'posts:add_comment', 
+                    'posts:follow_index', 'posts:profile_follow', 'posts:profile_unfollow'):
                     response = self.client.get(
                         reverse(name, args=arg), follow=True)
                     self.assertRedirects(

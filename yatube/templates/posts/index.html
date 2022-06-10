@@ -6,7 +6,7 @@
 
 {% block content %}
   <h1>Последние обновления на сайте</h1>
-  {% include 'posts/includes/switcher.html' %}
+  {% include 'posts/includes/switcher.html' with index=True%}
   {% cache 20 index_page page_obj %}
     {% for post in page_obj %}
       {% include 'posts/includes/vis_post.html' %}

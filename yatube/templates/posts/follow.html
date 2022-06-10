@@ -6,7 +6,7 @@
 
 {% block content %}
   <h1>Gjlgbcrb</h1>
-  {% include 'posts/includes/switcher.html' %}
+  {% include 'posts/includes/switcher.html' with follow=True%}
   {% for post in page_obj %}
     {% include 'posts/includes/vis_post.html' %}
   {% endfor %}
