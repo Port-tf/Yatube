@@ -33,7 +33,8 @@ def profile(request, username):
     author = get_object_or_404(User, username=username)
     author_posts = author.posts.select_related('group').all()
     page_obj = paginator_posts(request, author_posts)
-    following = request.user.is_authenticated and author.following.exists()
+    following = (request.user.is_authenticated
+                 and author.following.filter(user=request.user).exists())
     context = {
         'author': author,
         'page_obj': page_obj,

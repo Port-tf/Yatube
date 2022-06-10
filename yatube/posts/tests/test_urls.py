@@ -77,6 +77,29 @@ class PostURLTests(TestCase):
             with self.subTest(name=name):
                 self.assertEqual(reverse(name, args=arg), url)
 
+    def test_reverse_author_client_template(self):
+        """Доступность урлов для автора."""
+        for name, arg, _ in self.hard_names:
+            with self.subTest(name=name):
+                if name == 'posts:add_comment':
+                    self.assertRedirects(self.authorized_client.get(
+                        reverse(name, args=arg), follow=True),
+                        reverse(
+                            'posts:post_detail',
+                            args=(self.post.id,)
+                    ))
+                elif name in ('posts:profile_follow',
+                              'posts:profile_unfollow'):
+                    self.assertRedirects(self.authorized_client.get(
+                        reverse(name, args=arg),),
+                        reverse(
+                            'posts:profile',
+                            args=(self.user,)
+                    ))
+                else:
+                    self.assertEqual(self.authorized_client.get(
+                        reverse(name, args=arg)).status_code, HTTPStatus.OK)
+
     def test_reverse_name_authorized_client_template(self):
         """name использует нужный шаблон для авторизированого
         пользователя, не автор поста."""
