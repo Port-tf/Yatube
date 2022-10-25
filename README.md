@@ -6,19 +6,19 @@
 Python 3.8, Django 2.2.19, DjangoORM, SQLite
 
 # Запуск проекта
-- Создание и активация виртуального окружения:
+Создание и активация виртуального окружения:
 
 python3 -m venv venv
 source venv/Scripts/activate
 
-- Установка зависимостей из файла requirements.txt:
+Установка зависимостей из файла requirements.txt:
 
 pip install -r requirements.txt
 
-- Применить миграции:
+Применить миграции:
 
 python manage.py migrate
 
-- Запустить проект:
+Запустить проект:
 
 python3 manage.py runserver
