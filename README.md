@@ -1,3 +1,3 @@
-# hw05_final
-
-[![CI](https://github.com/yandex-praktikum/hw05_final/actions/workflows/python-app.yml/badge.svg?branch=master)](https://github.com/yandex-praktikum/hw05_final/actions/workflows/python-app.yml)
+# Социальная сеть "Yatube".
+Веб-проект на фреймворке Django.
+Социальная сеть Yatube с авторизацией, персональными лентами, комментариями к постам ленты и возможностью подписаться на понравившихся авторов.
